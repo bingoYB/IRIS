@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## [v0.7.1](https://github.com/versenilvis/iris/releases/tag/v0.7.1) - 2026-09-26
+
+### Features
+
+- Add mas completions ([#162](https://github.com/versenilvis/iris/issues/162)) ([36ac2a](https://github.com/versenilvis/iris/commit/36ac2a5dc12cb4ad545cd2440d557cdfafdd1786))
+
 ## [v0.7.0](https://github.com/versenilvis/iris/releases/tag/v0.7.0) - 2026-08-30
 
 ### Bug fixes
