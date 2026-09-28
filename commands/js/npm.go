@@ -2,30 +2,40 @@ package js
 
 import (
 	"encoding/json"
+	"maps"
 	"os"
 	"path/filepath"
+	"slices"
 
 	"github.com/versenilvis/iris/spec"
 )
 
 func NpmScriptGenerator(tokens []string, _ string, _ string) []spec.Suggestion {
+	results, found := packageScriptSuggestions()
+	if found {
+		return results
+	}
+	return []spec.Suggestion{
+		{Cmd: "dev", Desc: "development server"},
+		{Cmd: "build", Desc: "build for production"},
+		{Cmd: "start", Desc: "start application"},
+		{Cmd: "test", Desc: "run test suite"},
+		{Cmd: "lint", Desc: "run linter"},
+	}
+}
+
+func packageScriptSuggestions() ([]spec.Suggestion, bool) {
 	cwd := spec.GetCWD()
 	data, err := os.ReadFile(filepath.Join(cwd, "package.json"))
 	if err != nil {
-		return []spec.Suggestion{
-			{Cmd: "dev", Desc: "development server"},
-			{Cmd: "build", Desc: "build for production"},
-			{Cmd: "start", Desc: "start application"},
-			{Cmd: "test", Desc: "run test suite"},
-			{Cmd: "lint", Desc: "run linter"},
-		}
+		return nil, false
 	}
 
 	var pkg struct {
 		Scripts map[string]string `json:"scripts"`
 	}
 	if err := json.Unmarshal(data, &pkg); err != nil || len(pkg.Scripts) == 0 {
-		return nil
+		return nil, true
 	}
 
 	priority := []string{"dev", "start", "build", "test", "lint", "preview", "typecheck", "format"}
@@ -39,13 +49,13 @@ func NpmScriptGenerator(tokens []string, _ string, _ string) []spec.Suggestion {
 		}
 	}
 
-	for name, cmd := range pkg.Scripts {
+	for _, name := range slices.Sorted(maps.Keys(pkg.Scripts)) {
 		if !seen[name] {
-			results = append(results, spec.Suggestion{Cmd: name, Desc: cmd})
+			results = append(results, spec.Suggestion{Cmd: name, Desc: pkg.Scripts[name]})
 		}
 	}
 
-	return results
+	return results, true
 }
 
 func init() {
