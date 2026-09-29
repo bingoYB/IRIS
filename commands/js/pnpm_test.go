@@ -17,16 +17,18 @@ func TestPnpmDirectScriptCompletion(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, input := range []string{"pnpm ", "pnpm type", "pnpm lint:", "pnpm run "} {
-		results := spec.Lookup(input)
-		want := "pnpm typecheck"
-		if input == "pnpm lint:" {
-			want = "pnpm lint:fix"
-		} else if input == "pnpm run " {
-			want = "pnpm run typecheck"
-		}
-		if !hasSuggestion(results, want) {
-			t.Errorf("Lookup(%q) did not suggest %q: %v", input, want, results)
+	for _, tt := range []struct {
+		input string
+		want  string
+	}{
+		{input: "pnpm ", want: "pnpm typecheck"},
+		{input: "pnpm type", want: "pnpm typecheck"},
+		{input: "pnpm lint:", want: "pnpm lint:fix"},
+		{input: "pnpm run ", want: "pnpm run typecheck"},
+	} {
+		results := spec.Lookup(tt.input)
+		if !hasSuggestion(results, tt.want) {
+			t.Errorf("Lookup(%q) did not suggest %q: %v", tt.input, tt.want, results)
 		}
 	}
 
