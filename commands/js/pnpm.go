@@ -1,13 +1,37 @@
 package js
 
-import (
-	"github.com/versenilvis/iris/spec"
-)
+import "github.com/versenilvis/iris/spec"
+
+func pnpmScriptGenerator(_ []string, _ string, _ string) []spec.Suggestion {
+	scripts, found := packageScriptSuggestions()
+	if !found {
+		return nil
+	}
+
+	registered := spec.Registry["pnpm"]
+	if registered == nil {
+		return scripts
+	}
+
+	builtins := make(map[string]bool, len(registered.Subcommands))
+	for _, sub := range registered.Subcommands {
+		builtins[sub.Name] = true
+	}
+
+	var results []spec.Suggestion
+	for _, script := range scripts {
+		if !builtins[script.Cmd] {
+			results = append(results, script)
+		}
+	}
+	return results
+}
 
 func init() {
 	spec.Register(&spec.Spec{
 		Name:        "pnpm",
 		Description: "fast node packages",
+		Generator:   pnpmScriptGenerator,
 		Subcommands: []spec.Subcommand{
 			{Name: "install", Description: "install packages", Options: []spec.Option{
 				{Name: "--frozen-lockfile", Description: "no lockfile update"},
