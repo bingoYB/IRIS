@@ -13,7 +13,7 @@ func init() {
 	spec.Register(&spec.Spec{
 		Name:        "make",
 		Description: "build automation",
-		Generator: func(tokens []string, prefix string, partial string) []spec.Suggestion {
+		Generator: func(_ []string, _ string, _ string) []spec.Suggestion {
 			// Read the Makefile
 			cwd := spec.GetCWD()
 			file, err := os.Open(filepath.Join(cwd, "Makefile"))
@@ -39,13 +39,9 @@ func init() {
 						continue
 					}
 					seen[target] = true
-					
-					cmd := target
-					if prefix != "" {
-						cmd = prefix + " " + target
-					}
+
 					suggestions = append(suggestions, spec.Suggestion{
-						Cmd:  cmd,
+						Cmd:  target,
 						Desc: "make target",
 					})
 				}
